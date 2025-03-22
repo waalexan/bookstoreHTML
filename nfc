@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de NFC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        #startButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #startButton:disabled {
+            background-color: #ccc;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #nfcData {
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 10px;
+            background-color: #e7f3e7;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leitor de NFC</h1>
+    <button id="startButton">Iniciar Leitura NFC</button>
+    <p id="status">Aguardando por um cartão NFC...</p>
+    <div id="nfcData"></div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const statusElement = document.getElementById('status');
+        const nfcDataElement = document.getElementById('nfcData');
+
+        // Verificar se o navegador suporta a API Web NFC
+        if ('NFCReader' in window) {
+            statusElement.textContent = "Clique para iniciar a leitura NFC.";
+        } else {
+            statusElement.textContent = "A API Web NFC não é compatível com este navegador.";
+            startButton.disabled = true;
+        }
+
+        startButton.addEventListener('click', async () => {
+            try {
+                const reader = new NFCReader();
+                await reader.scan();
+
+                reader.onreading = (event) => {
+                    const { message } = event;
+                    const nfcData = message.records.map(record => record.data).join(', ');
+                    statusElement.textContent = "NFC detectado!";
+                    nfcDataElement.textContent = `Dados NFC: ${nfcData}`;
+                };
+
+                reader.onerror = (error) => {
+                    statusElement.textContent = "Erro na leitura NFC.";
+                    nfcDataElement.textContent = `Erro: ${error}`;
+                };
+            } catch (error) {
+                statusElement.textContent = "Falha ao acessar o leitor NFC.";
+                nfcDataElement.textContent = `Erro: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
